@@ -1,6 +1,7 @@
 # backend/src/youtube.py
 
 import json
+import os
 
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -19,8 +20,10 @@ from config import (
     YOUTUBE_MAX_VIDEOS_PER_CHANNEL,
 )
 
+_flow_store: dict = {}
 CACHE_FILE = DATA_DIR / "yt_cache.json"
 CACHE_TTL_MINUTES = 30
+os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -38,18 +41,35 @@ def get_credentials() -> Credentials | None:
     return creds if creds and creds.valid else None
 
 
-def build_auth_flow(redirect_url: str) -> Flow:
+def build_auth_flow(redirect_uri: str) -> Flow:
 
-    return Flow.from_client_secrets_file(
+    flow = Flow.from_client_secrets_file(
         CLIENT_SECRET_FILE,
         scopes=YOUTUBE_SCOPES,
-        redirect_url=redirect_url,
+        redirect_uri=redirect_uri,
+    )
+    return flow
+
+
+def get_auth_url(flow: Flow) -> tuple[str, str]:
+    
+    auth_url, state = flow.authorization_url(
+        prompt="consent",
+        access_type="offline",
+        include_granted_scopes="true",
     )
 
+    return auth_url, state
 
-def save_token_from_code(code: str, redirect_uri: str) -> None:
 
-    flow = build_auth_flow(redirect_uri)
+def save_token_from_code(code: str, redirect_uri: str, state: str) -> None:
+
+    flow = _flow_store.pop(state, None)
+    
+    if flow is None:
+        raise ValueError("OAuth state not found — please restart the auth flow")
+    
+    os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
     flow.fetch_token(code=code)
     TOKEN_FILE.write_text(flow.credentials.to_json())
 

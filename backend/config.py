@@ -23,7 +23,7 @@ load_dotenv(ENV_FILE)
 YOUTUBE_SCOPES = ["https://www.googleapis.com/auth/youtube.readonly"]
 YOUTUBE_MAX_SUBSCRIPTIONS = int(os.getenv("YOUTUBE_MAX_SUBSCRIPTIONS", "50"))
 YOUTUBE_MAX_VIDEOS_PER_CHANNEL = int(os.getenv("YOUTUBE_MAX_VIDEOS_PER_CHANNEL", "5"))
-CACHE_TTL_MINUTES = int(os.getenv("CACHE_TTL_MINUTES", "30"))
+CACHE_TTL_MINUTES = int(os.getenv("CACHE_TTL_MINUTES", "30"))   
 
 # ── Nitter ────────────────────────────────────────────────────────────────────
 
@@ -34,6 +34,17 @@ NITTER_INSTANCES = [
 ]
 NITTER_TIMEOUT = int(os.getenv("NITTER_TIMEOUT", "8"))
 NITTER_MAX_TWEETS_PER_HANDLE = int(os.getenv("NITTER_MAX_TWEETS_PER_HANDLE", "10"))
+
+# ── Telegram ──────────────────────────────────────────────────────────────────
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHANNEL_IDS = [
+    ch.strip()
+    for ch in os.getenv("TELEGRAM_CHANNEL_IDS", "").split(",")
+    if ch.strip()
+]
+TELEGRAM_MAX_MESSAGES_PER_CHANNEL = int(os.getenv("TELEGRAM_MAX_MESSAGES_PER_CHANNEL", "20"))
+TELEGRAM_CACHE_TTL_MINUTES = int(os.getenv("TELEGRAM_CACHE_TTL_MINUTES", "15"))
 
 # ── Server ────────────────────────────────────────────────────────────────────
 
